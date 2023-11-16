@@ -143,11 +143,6 @@ function createLSystem(){
   lSystemParamsFolder.add(lSystemParams, 'generate').name('Generate');
 
   preloadCtr.onChange( value => {
-    if(rulesCtr){
-      rulesCtr.controllersRecursive().forEach(rule => {
-        rule.destroy();
-      });
-    }
     loadPreload(value);
   });
   
@@ -156,18 +151,43 @@ function createLSystem(){
   })
 }
 
-function changeLSystem(event) {
-  variablesCtr.onFinishChange( function( variables ) {
-    let variablesArray = variables.split(',').map(variable => variable.trim());
-    lSystemParams.rules.splice(0, lSystemParams.rules.length);
-    for (let i = 0; i <= variablesArray.length; i++) {
-      lSystemParams.rules.forEach(rule => {
-        let currVariable = lSystemParams.rules.find(rule => rule.variable === variablesArray[i]);
-        lSystemParams.rules.push(rule);
-        rulesCtr.add(rule, 'rule').name(`${rule.variable} -> `);
-      });
-    }
+function changeRules(rules){
+  if(rulesCtr){
+    rulesCtr.controllersRecursive().forEach(rule => {
+      rule.destroy();
+    });
+  }
+  lSystemParams.rules.splice(0, lSystemParams.rules.length);
+  rules.forEach(rule => {
+    lSystemParams.rules.push(rule);
+    rulesCtr.add(rule, 'rule').name(rule.variable);
   });
+}
+
+function changeLSystem(event) {
+  if(event.controller == variablesCtr){
+    let oldRules = []
+    let newRules = [];
+    let variablesArray = event.value.split(',').map(variable => variable.trim());
+    rulesCtr.controllersRecursive().forEach(currRule => {
+      oldRules.push({variable: currRule._name, rule: currRule.getValue()});
+    });
+
+    let newVariable = true;
+    variablesArray.forEach(currVariable => {
+      newVariable = true;
+      oldRules.forEach(oldRule => {
+        if(currVariable == oldRule.variable) {
+          newVariable = false;
+          newRules.push(oldRule);
+        }
+      });
+      if(newVariable) {
+        newRules.push({variable: currVariable, rule: currVariable})
+      }
+    });
+    changeRules(newRules);
+  }
 }
 
 function loadPreload(preload) {
@@ -177,11 +197,7 @@ function loadPreload(preload) {
   constantsCtr.setValue(preload.constants);
   startCtr.setValue(preload.start);
 
-  lSystemParams.rules.splice(0, lSystemParams.rules.length);
-  preload.rules.forEach(rule => {
-    lSystemParams.rules.push(rule);
-    rulesCtr.add(rule, 'rule').name(`${rule.variable} -> `);
-  });
+  changeRules(preload.rules);
 
   angleCtr.setValue(preload.angle);
   iterateCtr.setValue(preload.iterate);
