@@ -17,6 +17,7 @@ var preloadCtr, variablesCtr, constantsCtr, startCtr, rulesCtr, angleCtr, iterat
 
 var fractalGUI = {
 	fractalTypes: "Select one",
+  preload: "Select one",
 };
 
 var preloadCustom = {
@@ -52,12 +53,12 @@ var preloadCurve = {
   start: "Asd",
   rules: [
     {
-      variable: "A",
-      rule: "ABA"
+      variable: "XT",
+      rule: "ASD"
     },
     {
-      variable: "B",
-      rule: "BB"
+      variable: "rr",
+      rule: "123"
     }
   ],
   angle: 123,
@@ -65,7 +66,6 @@ var preloadCurve = {
 };
 
 var lSystemParams = {
-  preload: "Select one",
   variables: "",
   constants: "+, -, [, ]",
   start: "",
@@ -129,54 +129,9 @@ function addGUI() {
 
 function createLSystem(){
   var lSystemPreloads = {"Custom" : preloadCustom, "Tree" : preloadTree, "Curve" : preloadCurve};
-  preloadCtr = gui.add(lSystemParams, 'preload', lSystemPreloads).name("Preload");
+  preloadCtr = gui.add(fractalGUI, 'preload', lSystemPreloads).name("Preload");
 
-  preloadCtr.setValue(loadPreload(preloadCustom));
-
-  preloadCtr.onChange( value => {
-    lSystemParamsFolder.destroy();
-    loadPreload(value);
-  });
-  
-  // let variablesArray = variables.split(',').map(variable => variable.trim());
-  // for (let i = 0; i < rules.length; i++) {
-  //   let ruleParts = variablesArray.split('->').map(rules => rules.trim());
-  //   gui.add(lSystemParams.rules, ruleParts[1]).name(`Rule ${ruleParts[0]}`);
-  // }
-  // changeRulesBasedOnVariables(variables);
-
-  function checkIfValidVariables(newVariables) {
-    //todo false part
-    changeRulesBasedOnVariables(newVariables);
-    return true;
-  }
-
-  function changeRulesBasedOnVariables(str) {
-    let variablesArray = str.split(',').map(variable => variable.trim());
-  
-    // Remove existing rule controllers
-    for (let i = lSystemParams.rules.length - 1; i >= 0; i--) {
-      gui.__controllers.forEach(controller => {
-        if (controller.initialValue === lSystemParams.rules[i]) {
-          gui.remove(controller);
-        }
-      });
-    }
-  
-    // Add controllers for each rule
-    for (let i = 0; i < variablesArray.length; i++) {
-      let ruleParts = lSystemParams.rules[i].split('->').map(rules => rules.trim());
-      if(lSystemParams.rules[i] == ruleParts[0])
-        gui.add(lSystemParams.rules, ruleParts[1]).name(`Rule ${ruleParts[0]}`);
-      else {
-        gui.add(lSystemParams.rules, i).name(`Rule ${ruleParts[0]}`);
-      }
-    }
-  }
-}
-
-function loadPreload(preload) {
-  lSystemParamsFolder = gui.addFolder( 'L-System params' );
+  lSystemParamsFolder = gui.addFolder('L-System params').hide(); // not pretty
 
   variablesCtr = lSystemParamsFolder.add(lSystemParams, 'variables').name('Variables');
   constantsCtr = lSystemParamsFolder.add(lSystemParams, 'constants').name('Constants').disable();
@@ -187,6 +142,37 @@ function loadPreload(preload) {
 
   lSystemParamsFolder.add(lSystemParams, 'generate').name('Generate');
 
+  preloadCtr.onChange( value => {
+    if(rulesCtr){
+      rulesCtr.controllersRecursive().forEach(rule => {
+        rule.destroy();
+      });
+    }
+    loadPreload(value);
+  });
+  
+  lSystemParamsFolder.onFinishChange( event => {
+    changeLSystem(event);
+  })
+}
+
+function changeLSystem(event) {
+  variablesCtr.onFinishChange( function( variables ) {
+    let variablesArray = variables.split(',').map(variable => variable.trim());
+    lSystemParams.rules.splice(0, lSystemParams.rules.length);
+    for (let i = 0; i <= variablesArray.length; i++) {
+      lSystemParams.rules.forEach(rule => {
+        let currVariable = lSystemParams.rules.find(rule => rule.variable === variablesArray[i]);
+        lSystemParams.rules.push(rule);
+        rulesCtr.add(rule, 'rule').name(`${rule.variable} -> `);
+      });
+    }
+  });
+}
+
+function loadPreload(preload) {
+  lSystemParamsFolder.show();
+
   variablesCtr.setValue(preload.variables);
   constantsCtr.setValue(preload.constants);
   startCtr.setValue(preload.start);
@@ -194,7 +180,7 @@ function loadPreload(preload) {
   lSystemParams.rules.splice(0, lSystemParams.rules.length);
   preload.rules.forEach(rule => {
     lSystemParams.rules.push(rule);
-    rulesCtr.add(rule, 'rule').name(rule.variable);
+    rulesCtr.add(rule, 'rule').name(`${rule.variable} -> `);
   });
 
   angleCtr.setValue(preload.angle);
