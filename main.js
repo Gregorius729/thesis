@@ -12,12 +12,13 @@ var ambientLight, directionalLight;
 var stats;
 var controls;
 var lSystemParamsFolder;
-var lSystemParamsRulesFolder;
 var preloadCtr, variablesCtr, constantsCtr, startCtr, rulesCtr, angleCtr, iterateCtr;
+var generateLSystemButton, fractalTypesDropdown;
 
 var fractalGUI = {
 	fractalTypes: "Select one",
   preload: "Select one",
+  generate: function() { renderLSystem() }
 };
 
 var preloadCustom = {
@@ -72,7 +73,6 @@ var lSystemParams = {
   rules: [],
   angle: 0,
   iterate: 1,
-  generate: function() { }
 };
 
 const gui = new GUI();
@@ -99,31 +99,27 @@ function init(){
   renderer.render(scene, camera);
 }
 
-function createBranch() {
-  branchGeometry = new THREE.CylinderGeometry(5, 5, 20, 32);
-  branchMaterial = new THREE.MeshLambertMaterial({ color: 0x964B00 });
-  branch = new THREE.Mesh(branchGeometry, branchMaterial);
-
-  scene.add( branch );
-}
-
 function addGUI() {
 
   var fractalTypes = ["L-System", "IFS", "Limitation set"];
-  var currValue = fractalGUI.fractalTypes;
-  gui.add(fractalGUI, 'fractalTypes', fractalTypes).name("Fractal Type").onChange( value => {
-    if(currValue == fractalTypes[0]){
+  var currFractalType = fractalGUI.fractalTypes;
+  fractalTypesDropdown = gui.add(fractalGUI, 'fractalTypes', fractalTypes).name("Fractal Type");
+
+  fractalTypesDropdown.onChange( value => {
+    if(currFractalType == "L-System"){
       lSystemParamsFolder.destroy();
+      generateLSystemButton.destroy();
+      preloadCtr.destroy();
     }
-    // } else if (currValue == fractalTypes[1]) {
+    // } else if (currFractalType == fractalTypes[1]) {
     //   IFS.destroy();
-    // } else if (currValue == fractalTypes[2]) {
+    // } else if (currFractalType == fractalTypes[2]) {
     //   limSet.destroy();
     // }
     if(value == fractalTypes[0]) {
       createLSystem();
     }
-    currValue = value;
+    currFractalType = value;
   } );
 }
 
@@ -133,6 +129,8 @@ function createLSystem(){
 
   lSystemParamsFolder = gui.addFolder('L-System params').hide(); // not pretty
 
+
+  //TODO REAL TIME VALIDATION FOR VARIABLES AND RULES
   variablesCtr = lSystemParamsFolder.add(lSystemParams, 'variables').name('Variables');
   constantsCtr = lSystemParamsFolder.add(lSystemParams, 'constants').name('Constants').disable();
   startCtr = lSystemParamsFolder.add(lSystemParams, 'start').name('Start');
@@ -140,7 +138,7 @@ function createLSystem(){
   angleCtr = lSystemParamsFolder.add(lSystemParams, 'angle', 0, 180, 1).name('Angle');
   iterateCtr = lSystemParamsFolder.add(lSystemParams, 'iterate', 1, 5, 1).name('Iterate');
 
-  lSystemParamsFolder.add(lSystemParams, 'generate').name('Generate');
+  generateLSystemButton = gui.add(fractalGUI, 'generate').name('Generate').hide();
 
   preloadCtr.onChange( value => {
     loadPreload(value);
@@ -192,6 +190,7 @@ function changeLSystem(event) {
 
 function loadPreload(preload) {
   lSystemParamsFolder.show();
+  generateLSystemButton.show();
 
   variablesCtr.setValue(preload.variables);
   constantsCtr.setValue(preload.constants);
@@ -203,28 +202,39 @@ function loadPreload(preload) {
   iterateCtr.setValue(preload.iterate);
 }
 
-function renderFractal() {
-  
+function renderLSystem() {
+  let fractal = iterateLSystem();
+
+  const iterator = fractal[Symbol.iterator]();
+  let theChar = iterator.next();
+
+  while (!theChar.done) {
+    if(theChar.value == 'A'){
+      createBranch();
+    }
+    theChar = iterator.next();
+  }
 }
 
-function iterateFractal() {
-  let currentSentence = lSystemParams.start;
-  let newSentence = '';
-  for (let i = 1; i <= lSystemParams.iterate; i++) {
-      for (let j = 0; j < currentSentence.length; j++) {
-          if (currentSentence[j] === 'F') {
-              newSentence += rule1;
-          } else if (currentSentence[j] === 'X') {
-              newSentence += rule2;
-          } else {
-              newSentence += currentSentence[j];
-          }
-      }
-      currentSentence = newSentence;
-      newSentence = '';
+function iterateLSystem() {
+  let fractal = lSystemParams.start;
+  for(let i = 0; i < lSystemParams.iterate; i++){
+    lSystemParams.rules.forEach(rule => {
+      fractal = fractal.replaceAll(rule.variable, rule.rule);
+    })
   }
-  // sentence = currentSentence;
+  return fractal;
 }
+
+function createBranch() {
+  branchGeometry = new THREE.CylinderGeometry(5, 5, 20, 32);
+  branchMaterial = new THREE.MeshLambertMaterial({ color: 0x964B00 });
+  branch = new THREE.Mesh(branchGeometry, branchMaterial);
+
+
+  scene.add( branch );
+}
+
 
 function addLights() {
   ambientLight = new THREE.AmbientLight(0xffffff);
@@ -247,7 +257,8 @@ function addStats() {
 function handleWindowResize() {
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
-  renderer.render(scene, camera);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
 }
 
 function animate(){
