@@ -37,11 +37,11 @@ var preloadTree = {
   rules: [
     {
       variable: "A",
-      rule: "ABA"
+      rule: "A-B+A"
     },
     {
       variable: "B",
-      rule: "BB"
+      rule: "B-B"
     }
   ],
   angle: 25,
@@ -49,21 +49,17 @@ var preloadTree = {
 };
 
 var preloadCurve = {
-  variables: "QWE",
+  variables: "F",
   constants: "+, -, [, ]",
-  start: "Asd",
+  start: "F-F-F-F",
   rules: [
     {
-      variable: "XT",
-      rule: "ASD"
+      variable: "F",
+      rule: "FF-F-F-F-F-F+F"
     },
-    {
-      variable: "rr",
-      rule: "123"
-    }
   ],
-  angle: 123,
-  iterate: 2,
+  angle: 90,
+  iterate: 4,
 };
 
 var lSystemParams = {
@@ -90,7 +86,6 @@ function init(){
   renderer.setSize( window.innerWidth, window.innerHeight );
   camera.position.set(0, 100, 100);
 
-  createBranch();
   addLights();
   addGUI();
   addControls();
@@ -205,15 +200,36 @@ function loadPreload(preload) {
 function renderLSystem() {
   let fractal = iterateLSystem();
 
-  const iterator = fractal[Symbol.iterator]();
-  let theChar = iterator.next();
+  const ruleIterator = fractal[Symbol.iterator]();
+  let ruleChar = ruleIterator.next();
+  let branches = [];
+  let currBranch;
+  let newBranch = false;
+  branchGeometry = new THREE.CylinderGeometry(1, 1, 5, 10);
+  branchMaterial = new THREE.MeshLambertMaterial({ color: 0x964B00 });
+  currBranch = new THREE.Mesh(branchGeometry, branchMaterial);
+  
+  branches.push(currBranch);
 
-  while (!theChar.done) {
-    if(theChar.value == 'A'){
-      createBranch();
+  let variablesArray = lSystemParams.variables.split(',').map(variable => variable.trim());
+  while (!ruleChar.done) {
+    // now i have the l system 
+    // i need to rotate the next branch like the last if this char is not a rotation
+    // if it's not a rotation then i can add it to the scene
+    if(!variablesArray.includes(ruleChar.value)){
+      if (newBranch) {
+        currBranch = translateBranch(currBranch, currBranch.geometry.parameters.height / 2);
+        newBranch = false;
+      }
+      currBranch = rotateBranch(ruleChar.value, currBranch);
+    } else {
+      currBranch = translateBranch(currBranch, currBranch.geometry.parameters.height / 2);
+      branches.push(currBranch.clone());
+      newBranch = true;
     }
-    theChar = iterator.next();
+    ruleChar = ruleIterator.next();
   }
+  addTreeToScene(branches);
 }
 
 function iterateLSystem() {
@@ -226,15 +242,25 @@ function iterateLSystem() {
   return fractal;
 }
 
-function createBranch() {
-  branchGeometry = new THREE.CylinderGeometry(5, 5, 20, 32);
-  branchMaterial = new THREE.MeshLambertMaterial({ color: 0x964B00 });
-  branch = new THREE.Mesh(branchGeometry, branchMaterial);
-
-
-  scene.add( branch );
+function rotateBranch(direction, branch) {
+  if(direction == '+') {
+    branch.rotation.x += Math.PI / 180 * lSystemParams.angle;
+  } else if(direction == '-') {
+    branch.rotation.x -= Math.PI / 180 * lSystemParams.angle;
+  }
+  return branch;
 }
 
+function addTreeToScene(branches) {
+  branches.forEach(branch => {
+    scene.add(branch);
+  })
+}
+
+function translateBranch(branch, length) {
+  branch.translateY(length);
+  return branch;
+}
 
 function addLights() {
   ambientLight = new THREE.AmbientLight(0xffffff);
