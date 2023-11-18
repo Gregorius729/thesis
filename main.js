@@ -7,7 +7,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 
 var scene, camera, renderer;
-var branchGeometry, branchMaterial, branch;
+var branchGeometry, branchMaterial;
 var ambientLight, directionalLight;
 var stats;
 var controls;
@@ -31,21 +31,17 @@ var preloadCustom = {
 };
 
 var preloadTree = {
-  variables: "A, B",
-  constants: "+, -, [, ]",
-  start: "A",
+  variables: "F",
+  constants: "+, -, &, ^, <, >, |, [, ]",
+  start: "F",
   rules: [
     {
-      variable: "A",
-      rule: "A-B+A"
-    },
-    {
-      variable: "B",
-      rule: "B-B"
+      variable: "F",
+      rule: "F [+ F][ - F ]"
     }
   ],
-  angle: 25,
-  iterate: 3,
+  angle: 45,
+  iterate: 1,
 };
 
 var preloadCurve = {
@@ -203,29 +199,36 @@ function renderLSystem() {
   const ruleIterator = fractal[Symbol.iterator]();
   let ruleChar = ruleIterator.next();
   let branches = [];
-  let currBranch;
-  let newBranch = false;
-  branchGeometry = new THREE.CylinderGeometry(1, 1, 5, 10);
+  let states = [];
+  let isNewBranch = false;
+
+  branchGeometry = new THREE.CylinderGeometry(1, 1, 10, 10);
   branchMaterial = new THREE.MeshLambertMaterial({ color: 0x964B00 });
-  currBranch = new THREE.Mesh(branchGeometry, branchMaterial);
+  let currBranch = new THREE.Mesh(branchGeometry, branchMaterial);
   
   branches.push(currBranch);
 
   let variablesArray = lSystemParams.variables.split(',').map(variable => variable.trim());
+  let constantsArray = lSystemParams.constants.split(',').map(constant => constant.trim());
+
   while (!ruleChar.done) {
-    // now i have the l system 
-    // i need to rotate the next branch like the last if this char is not a rotation
-    // if it's not a rotation then i can add it to the scene
-    if(!variablesArray.includes(ruleChar.value)){
-      if (newBranch) {
+    if(constantsArray.includes(ruleChar.value)){
+      if (isNewBranch) {
         currBranch = translateBranch(currBranch, currBranch.geometry.parameters.height / 2);
-        newBranch = false;
+        isNewBranch = false;
       }
-      currBranch = rotateBranch(ruleChar.value, currBranch);
-    } else {
+      if(ruleChar.value == '[') {
+        states.push(currBranch.clone());
+      } else if(ruleChar.value == ']') {
+        currBranch = states[states.length - 1].clone();
+        states.pop();
+      } else {
+        currBranch = rotateBranch(ruleChar.value, currBranch);
+      }
+    } else if(variablesArray.includes(ruleChar.value)) {
       currBranch = translateBranch(currBranch, currBranch.geometry.parameters.height / 2);
       branches.push(currBranch.clone());
-      newBranch = true;
+      isNewBranch = true;
     }
     ruleChar = ruleIterator.next();
   }
@@ -247,12 +250,26 @@ function rotateBranch(direction, branch) {
     branch.rotation.x += Math.PI / 180 * lSystemParams.angle;
   } else if(direction == '-') {
     branch.rotation.x -= Math.PI / 180 * lSystemParams.angle;
+  } else if(direction == '&') {
+    branch.rotation.y -= Math.PI / 180 * lSystemParams.angle;
+  } else if(direction == '^') {
+    branch.rotation.y -= Math.PI / 180 * lSystemParams.angle;
+  } else if(direction == '>') {
+    branch.rotation.z -= Math.PI / 180 * lSystemParams.angle;
+  } else if(direction == '<') {
+    branch.rotation.z -= Math.PI / 180 * lSystemParams.angle;
+  } else if(direction == '|') {
+    branch.rotation.x -= Math.PI / 180;
+    branch.rotation.y -= Math.PI / 180;
+    branch.rotation.z -= Math.PI / 180;
   }
   return branch;
 }
 
 function addTreeToScene(branches) {
-  branches.forEach(branch => {
+  let newBranches = branches; // not pretty.. need another code to ged rid of the first branch
+  newBranches.shift();
+  newBranches.forEach(branch => {
     scene.add(branch);
   })
 }
