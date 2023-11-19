@@ -1,19 +1,11 @@
-import { GUI } from 'lil-gui';
-import { preloadCurve, preloadCustom, preloadTree } from '../assets/preloads.js';
-import { generateFractal } from '../main.js';
+import { preloadCurve, preloadCustom, preloadTree } from '../../../assets/preloads.js';
+import { gui, fractalGUI } from '../gui.js';
 
 let lSystemParamsFolder;
-let preloadCtr, variablesCtr, constantsCtr, startCtr, rulesCtr, angleCtr, iterateCtr;
-let generateLSystemButton, fractalTypesDropdown;
-let fractalTypes = ["L-System", "IFS", "Limitation set"];
-let currFractalType;
-
-let fractalGUI = {
-  fractalTypes: "Select one",
-  preload: "Select one",
-  generate: function() { generateFractal(lSystemParams, currFractalType) }
-};
-
+let variablesCtr, constantsCtr, startCtr, rulesCtr, angleCtr, iterateCtr;
+let preloadCtr;
+let generateLSystemButton;
+let lSystemPreloads;
 let lSystemParams = {
   variables: "",
   constants: "+, -, &, ^, <, >, |, [, ]",
@@ -23,32 +15,14 @@ let lSystemParams = {
   iterate: 1,
 };
 
-const gui = new GUI();
-
-export function addGUI() {
-  currFractalType = fractalGUI.fractalTypes;
-  fractalTypesDropdown = gui.add(fractalGUI, 'fractalTypes', fractalTypes).name("Fractal Type");
-
-  fractalTypesDropdown.onChange( value => {
-    if(currFractalType == "L-System"){
-      lSystemParamsFolder.destroy();
-      generateLSystemButton.destroy();
-      preloadCtr.destroy();
-    }
-    // } else if (currFractalType == fractalTypes[1]) {
-    //   IFS.destroy();
-    // } else if (currFractalType == fractalTypes[2]) {
-    //   limSet.destroy();
-    // }
-    if(value == fractalTypes[0]) {
-      createLSystem();
-    }
-    currFractalType = value;
-  } );
+export function destroyLSystem() {
+  lSystemParamsFolder.destroy();
+  generateLSystemButton.destroy();
+  preloadCtr.destroy();
 }
 
-function createLSystem(){
-  let lSystemPreloads = {"Custom" : preloadCustom, "Tree" : preloadTree, "Curve" : preloadCurve};
+export function createLSystem() {
+  lSystemPreloads = {"Custom" : preloadCustom, "Tree" : preloadTree, "Curve" : preloadCurve};
   preloadCtr = gui.add(fractalGUI, 'preload', lSystemPreloads).name("Preload");
 
   lSystemParamsFolder = gui.addFolder('L-System params').hide(); // not pretty
@@ -69,7 +43,9 @@ function createLSystem(){
   
   lSystemParamsFolder.onFinishChange( event => {
     changeLSystem(event);
-  })
+  });
+
+  return lSystemParams;
 }
 
 function changeRules(rules){

@@ -3,9 +3,9 @@ import '../style.css'
 import * as THREE from 'three';
 import Stats from 'stats.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { addGUI } from './controller/gui.js';
+import { addGUI } from './controller/gui/gui.js';
 import { renderLSystem } from './render/renderLSystem.js';
-
+import { renderIFS } from './render/renderIFS';
 
 let scene, camera, renderer;
 let ambientLight, directionalLight;
@@ -35,13 +35,13 @@ function init(){
 
 let oldBranches = [];
 
-export function generateFractal(lSystemParams, fractalType) {
+export function generateFractal(fractalParams, fractalType, preloadType) {
   if(fractalType == "L-System") {
     oldBranches.forEach(branch => {
       scene.remove(branch);
     })
   
-    let branches = renderLSystem(lSystemParams);
+    let branches = renderLSystem(fractalParams);
     oldBranches = branches;
     let newBranches = branches; // not pretty.. need another code to ged rid of the first branch
   
@@ -49,6 +49,12 @@ export function generateFractal(lSystemParams, fractalType) {
     newBranches.forEach(branch => {
       scene.add(branch);
     })
+  } else if (fractalType == "IFS") {
+    let sponge = renderIFS(fractalParams);
+    sponge.scale(1, 5, 1);
+    scene.add(sponge);
+
+
   }
 }
 
