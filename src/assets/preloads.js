@@ -22,15 +22,15 @@ export var preloadTree = {
 };
 
 export var preloadCurve = {
-    variables: "F",
-    constants: "+, -, &, ^, <, >, |, [, ]",
-    start: "F-F-F-F",
-    rules: [
-        {
-            variable: "F",
-            rule: "FF-F-F-F-F-F+F"
-        },
-    ],
-    angle: 90,
-    iterate: 4,
+variables: "F",
+constants: "+, -, &, ^, <, >, |, [, ]",
+start: "F-F-F-F",
+rules: [
+    {
+        variable: "F",
+        rule: "FF-F-F-F-F-F+F"
+    },
+],
+angle: 90,
+iterate: 4,
 };

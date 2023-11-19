@@ -7,10 +7,10 @@ import { addGUI } from './controller/gui.js';
 import { renderLSystem } from './render/renderLSystem.js';
 
 
-var scene, camera, renderer;
-var ambientLight, directionalLight;
-var stats;
-var controls;
+let scene, camera, renderer;
+let ambientLight, directionalLight;
+let stats;
+let controls;
 
 function init(){
   scene = new THREE.Scene();
@@ -33,13 +33,23 @@ function init(){
   renderer.render(scene, camera);
 }
 
-export function addTreeToScene(lSystemParams) {
-  let branches = renderLSystem(lSystemParams);
-  let newBranches = branches; // not pretty.. need another code to ged rid of the first branch
-  newBranches.shift();
-  newBranches.forEach(branch => {
-    scene.add(branch);
-  })
+let oldBranches = [];
+
+export function generateFractal(lSystemParams, fractalType) {
+  if(fractalType == "L-System") {
+    oldBranches.forEach(branch => {
+      scene.remove(branch);
+    })
+  
+    let branches = renderLSystem(lSystemParams);
+    oldBranches = branches;
+    let newBranches = branches; // not pretty.. need another code to ged rid of the first branch
+  
+    newBranches.shift();
+    newBranches.forEach(branch => {
+      scene.add(branch);
+    })
+  }
 }
 
 function addLights() {

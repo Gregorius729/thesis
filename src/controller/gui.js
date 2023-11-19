@@ -1,16 +1,17 @@
 import { GUI } from 'lil-gui';
 import { preloadCurve, preloadCustom, preloadTree } from '../assets/preloads.js';
-import { addTreeToScene } from '../main.js';
+import { generateFractal } from '../main.js';
 
 let lSystemParamsFolder;
 let preloadCtr, variablesCtr, constantsCtr, startCtr, rulesCtr, angleCtr, iterateCtr;
 let generateLSystemButton, fractalTypesDropdown;
-export let branches = [];
+let fractalTypes = ["L-System", "IFS", "Limitation set"];
+let currFractalType;
 
 let fractalGUI = {
   fractalTypes: "Select one",
   preload: "Select one",
-  generate: function() { addTreeToScene(lSystemParams) }
+  generate: function() { generateFractal(lSystemParams, currFractalType) }
 };
 
 let lSystemParams = {
@@ -25,8 +26,7 @@ let lSystemParams = {
 const gui = new GUI();
 
 export function addGUI() {
-  let fractalTypes = ["L-System", "IFS", "Limitation set"];
-  let currFractalType = fractalGUI.fractalTypes;
+  currFractalType = fractalGUI.fractalTypes;
   fractalTypesDropdown = gui.add(fractalGUI, 'fractalTypes', fractalTypes).name("Fractal Type");
 
   fractalTypesDropdown.onChange( value => {

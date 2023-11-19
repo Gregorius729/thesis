@@ -75,14 +75,6 @@ function rotateBranch(direction, branch, lSystemParams) {
   return branch;
 }
 
-// function addTreeToScene(branches) {
-//   let newBranches = branches; // not pretty.. need another code to ged rid of the first branch
-//   newBranches.shift();
-//   newBranches.forEach(branch => {
-//     scene.add(branch);
-//   })
-// }
-
 function translateBranch(branch, length) {
   branch.translateY(length);
   return branch;
