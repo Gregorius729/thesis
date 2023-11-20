@@ -10,7 +10,7 @@ let currFractalType, currPreloadType;
 export let fractalGUI = {
   fractalTypes: "Select one",
   preload: "Select one",
-  generate: function() { generateFractal(GUIParams, currFractalType, currPreloadType) }
+  generate: function() { generateFractal(GUIParams, currFractalType) }
 };
 
 let GUIParams = {};
@@ -22,6 +22,7 @@ export function addGUI() {
   fractalTypesDropdown = gui.add(fractalGUI, 'fractalTypes', fractalTypes).name("Fractal Type");
 
   fractalTypesDropdown.onChange( value => {
+    currPreloadType = fractalGUI.preload;
     fractalGUI.preload = "Select one";
     GUIParams = {};
     if(currFractalType == "L-System"){

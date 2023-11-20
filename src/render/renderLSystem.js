@@ -68,9 +68,7 @@ function rotateBranch(direction, branch, lSystemParams) {
   } else if(direction == '<') {
     branch.rotation.z -= Math.PI / 180 * lSystemParams.angle;
   } else if(direction == '|') {
-    branch.rotation.x -= Math.PI / 180;
-    branch.rotation.y -= Math.PI / 180;
-    branch.rotation.z -= Math.PI / 180;
+    branch.rotation.y -= Math.PI; // TODO not working properly
   }
   return branch;
 }

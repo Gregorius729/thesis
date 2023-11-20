@@ -1,4 +1,4 @@
-import { preloadMengerSponge } from '../../../assets/preloads.js';
+import { preloadMengerSponge, preloadSierpinskiPyramid } from '../../../assets/preloads.js';
 import { gui, fractalGUI } from '../gui.js';
 
 let IFSParamsFolder;
@@ -7,6 +7,7 @@ let preloadCtr;
 let generateIFSButton;
 let IFSPreloads;
 let IFSParams = {
+  type: "",
   iterate: 1,
 };
 
@@ -17,13 +18,12 @@ export function destroyIFS() {
 }
 
 export function createIFS() {
-  IFSPreloads = {"Menger sponge" : preloadMengerSponge};
+  IFSPreloads = {"Menger sponge" : preloadMengerSponge, "Sierpinski Pyramid" : preloadSierpinskiPyramid};
   preloadCtr = gui.add(fractalGUI, 'preload', IFSPreloads).name("Preload");
 
   IFSParamsFolder = gui.addFolder('IFS params').hide(); // not pretty
 
-  //TODO REAL TIME VALIDATION FOR VARIABLES AND RULES
-  iterateCtr = IFSParamsFolder.add(IFSParams, 'iterate', 1, 8, 1).name('Iterate');
+  iterateCtr = IFSParamsFolder.add(IFSParams, 'iterate', 1, 10, 1).name('Iterate');
 
   generateIFSButton = gui.add(fractalGUI, 'generate').name('Generate').hide();
 
@@ -37,5 +37,6 @@ export function createIFS() {
 function loadPreload(preload) {
   IFSParamsFolder.show();
   generateIFSButton.show();
+  IFSParams.type = preload.type;
   iterateCtr.setValue(preload.iterate);
 }

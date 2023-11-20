@@ -36,5 +36,11 @@ export var preloadCurve = {
 };
 
 export var preloadMengerSponge = {
+    type: "Menger Sponge",
     iterate: 3,
+}
+
+export var preloadSierpinskiPyramid = {
+    type: "Sierpinski Pyramid",
+    iterate: 1,
 }

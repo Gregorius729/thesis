@@ -25,6 +25,8 @@ function init(){
   renderer.setSize( window.innerWidth, window.innerHeight );
   camera.position.set(0, 100, 100);
 
+  const axesHelper = new THREE.AxesHelper( 1000 );
+  scene.add( axesHelper );
   addLights();
   addGUI();
   addControls();
@@ -34,13 +36,15 @@ function init(){
 }
 
 let oldBranches = [];
+let oldSponge;
 
-export function generateFractal(fractalParams, fractalType, preloadType) {
+export function generateFractal(fractalParams, fractalType) {
+  scene.remove(oldSponge);
+  oldBranches.forEach(branch => {
+    scene.remove(branch);
+  })
+
   if(fractalType == "L-System") {
-    oldBranches.forEach(branch => {
-      scene.remove(branch);
-    })
-  
     let branches = renderLSystem(fractalParams);
     oldBranches = branches;
     let newBranches = branches; // not pretty.. need another code to ged rid of the first branch
@@ -51,10 +55,8 @@ export function generateFractal(fractalParams, fractalType, preloadType) {
     })
   } else if (fractalType == "IFS") {
     let sponge = renderIFS(fractalParams);
-    sponge.scale(1, 5, 1);
+    oldSponge = sponge;
     scene.add(sponge);
-
-
   }
 }
 
