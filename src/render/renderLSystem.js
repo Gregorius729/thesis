@@ -13,8 +13,6 @@ export function renderLSystem(lSystemParams) {
   let branchMaterial = new THREE.MeshLambertMaterial({ color: 0x964B00 });
   let currBranch = new THREE.Mesh(branchGeometry, branchMaterial);
   
-  branches.push(currBranch);
-
   let variablesArray = lSystemParams.variables.split(',').map(variable => variable.trim());
   let constantsArray = lSystemParams.constants.split(',').map(constant => constant.trim());
 
@@ -27,9 +25,10 @@ export function renderLSystem(lSystemParams) {
       if(ruleChar.value == '[') {
         states.push(currBranch.clone());
       } else if(ruleChar.value == ']') {
-        // put alert if states is empty
-        currBranch = states[states.length - 1].clone();
-        states.pop();
+        if(currBranch.length > 0) {
+          currBranch = states[states.length - 1].clone();
+          states.pop();
+        }
       } else {
         currBranch = rotateBranch(ruleChar.value, currBranch, lSystemParams);
       }
@@ -40,8 +39,12 @@ export function renderLSystem(lSystemParams) {
     }
     ruleChar = ruleIterator.next();
   }
-  console.log(branches);
-  return branches;
+
+  let group = new THREE.Group();
+  branches.forEach(branch => {
+    group.add(branch);
+  });
+  return group;
 }
 
 function iterateLSystem(lSystemParams) {
@@ -56,19 +59,19 @@ function iterateLSystem(lSystemParams) {
 
 function rotateBranch(direction, branch, lSystemParams) {
   if(direction == '+') {
-    branch.rotation.x += Math.PI / 180 * lSystemParams.angle;
+    branch.rotation.x += Math.PI / 180 * lSystemParams.angles[0].angle;
   } else if(direction == '-') {
-    branch.rotation.x -= Math.PI / 180 * lSystemParams.angle;
+    branch.rotation.x -= Math.PI / 180 * lSystemParams.angles[0].angle;
   } else if(direction == '&') {
-    branch.rotation.y += Math.PI / 180 * lSystemParams.angle;
+    branch.rotation.y += Math.PI / 180 * lSystemParams.angles[1].angle;
   } else if(direction == '^') {
-    branch.rotation.y -= Math.PI / 180 * lSystemParams.angle;
+    branch.rotation.y -= Math.PI / 180 * lSystemParams.angles[1].angle;
   } else if(direction == '>') {
-    branch.rotation.z += Math.PI / 180 * lSystemParams.angle;
+    branch.rotation.z += Math.PI / 180 * lSystemParams.angles[2].angle;
   } else if(direction == '<') {
-    branch.rotation.z -= Math.PI / 180 * lSystemParams.angle;
+    branch.rotation.z -= Math.PI / 180 * lSystemParams.angles[2].angle;
   } else if(direction == '|') {
-    branch.rotation.y -= Math.PI; // TODO not working properly
+    branch.rotation.x -= Math.PI;
   }
   return branch;
 }

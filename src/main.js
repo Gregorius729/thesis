@@ -35,29 +35,21 @@ function init(){
   renderer.render(scene, camera);
 }
 
-let oldBranches = [];
-let oldSponge;
+let oldLSystem;
+let oldIFS;
 
 export function generateFractal(fractalParams, fractalType) {
-  scene.remove(oldSponge);
-  oldBranches.forEach(branch => {
-    scene.remove(branch);
-  })
+  scene.remove(oldLSystem);
+  scene.remove(oldIFS);
 
   if(fractalType == "L-System") {
-    let branches = renderLSystem(fractalParams);
-    oldBranches = branches;
-    let newBranches = branches; // not pretty.. need another code to ged rid of the first branch
-  
-    newBranches.shift();
-    newBranches.forEach(branch => {
-      console.log(branch);
-      scene.add(branch);
-    })
+    let newlSystem = renderLSystem(fractalParams);
+    oldLSystem = newlSystem;
+    scene.add(newlSystem);
   } else if (fractalType == "IFS") {
-    let sponge = renderIFS(fractalParams);
-    oldSponge = sponge;
-    scene.add(sponge);
+    let newIFS = renderIFS(fractalParams);
+    oldIFS = newIFS;
+    scene.add(newIFS);
   }
 }
 

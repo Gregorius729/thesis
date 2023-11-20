@@ -49,11 +49,9 @@ export function createLSystem() {
 }
 
 function changeRules(rules){
-  if(rulesCtr){
-    rulesCtr.controllersRecursive().forEach(rule => {
-      rule.destroy();
-    });
-  }
+  rulesCtr.controllersRecursive().forEach(rule => {
+    rule.destroy();
+  });
   lSystemParams.rules.splice(0, lSystemParams.rules.length);
   rules.forEach(rule => {
     lSystemParams.rules.push(rule);
@@ -62,11 +60,10 @@ function changeRules(rules){
 }
 
 function changeAngles(angles){
-  if(anglesCtr){
-    anglesCtr.controllersRecursive().forEach(angle => {
-      angle.destroy();
-    });
-  }
+  anglesCtr.controllersRecursive().forEach(angle => {
+    angle.destroy();
+  });
+  lSystemParams.angles.splice(0, lSystemParams.angles.length);
   angles.forEach(angle => {
     lSystemParams.angles.push(angle);
     anglesCtr.add(angle, 'angle', 0, 180, 1).name(angle.axis);
