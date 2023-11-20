@@ -40,7 +40,7 @@ export function renderLSystem(lSystemParams) {
     }
     ruleChar = ruleIterator.next();
   }
-  
+  console.log(branches);
   return branches;
 }
 
@@ -60,11 +60,11 @@ function rotateBranch(direction, branch, lSystemParams) {
   } else if(direction == '-') {
     branch.rotation.x -= Math.PI / 180 * lSystemParams.angle;
   } else if(direction == '&') {
-    branch.rotation.y -= Math.PI / 180 * lSystemParams.angle;
+    branch.rotation.y += Math.PI / 180 * lSystemParams.angle;
   } else if(direction == '^') {
     branch.rotation.y -= Math.PI / 180 * lSystemParams.angle;
   } else if(direction == '>') {
-    branch.rotation.z -= Math.PI / 180 * lSystemParams.angle;
+    branch.rotation.z += Math.PI / 180 * lSystemParams.angle;
   } else if(direction == '<') {
     branch.rotation.z -= Math.PI / 180 * lSystemParams.angle;
   } else if(direction == '|') {

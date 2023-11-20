@@ -3,7 +3,20 @@ export var preloadCustom = {
     constants: "+, -, &, ^, <, >, |, [, ]",
     start: "",
     rules: [],
-    angle: 0,
+    angles: [
+        {
+            axis: "X axis (+, -)",
+            angle: 0
+        },
+        {
+            axis: "Y axis (&, ^)",
+            angle: 0
+        },
+        {
+            axis: "Z axis (<, >)",
+            angle: 0
+        }
+    ],
     iterate: 1,
 };
 
@@ -14,11 +27,24 @@ export var preloadTree = {
     rules: [
         {
             variable: "F",
-            rule: "F [+ F][ > F ] F"
+            rule: "F+FF"
         }
     ],
-    angle: 45,
-    iterate: 3,
+    angles: [
+        {
+            axis: "X axis (+, -)",
+            angle: 22.5
+        },
+        {
+            axis: "Y axis (&, ^)",
+            angle: 45
+        },
+        {
+            axis: "Z axis (<, >)",
+            angle: 67.5
+        }
+    ],
+    iterate: 1,
 };
 
 export var preloadCurve = {
@@ -31,7 +57,20 @@ export var preloadCurve = {
             rule: "FF-F-F-F-F-F+F"
         },
     ],
-    angle: 90,
+    angles: [
+        {
+            axis: "X axis (+, -)",
+            angle: 90
+        },
+        {
+            axis: "Y axis (&, ^)",
+            angle: 90
+        },
+        {
+            axis: "Z axis (<, >)",
+            angle: 90
+        }
+    ],
     iterate: 4,
 };
 

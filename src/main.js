@@ -51,6 +51,7 @@ export function generateFractal(fractalParams, fractalType) {
   
     newBranches.shift();
     newBranches.forEach(branch => {
+      console.log(branch);
       scene.add(branch);
     })
   } else if (fractalType == "IFS") {

@@ -2,7 +2,7 @@ import { preloadCurve, preloadCustom, preloadTree } from '../../../assets/preloa
 import { gui, fractalGUI } from '../gui.js';
 
 let lSystemParamsFolder;
-let variablesCtr, constantsCtr, startCtr, rulesCtr, angleCtr, iterateCtr;
+let variablesCtr, constantsCtr, startCtr, rulesCtr, anglesCtr, angleCtr, iterateCtr;
 let preloadCtr;
 let generateLSystemButton;
 let lSystemPreloads;
@@ -11,7 +11,7 @@ let lSystemParams = {
   constants: "+, -, &, ^, <, >, |, [, ]",
   start: "",
   rules: [],
-  angle: 0,
+  angles: [],
   iterate: 1,
 };
 
@@ -32,7 +32,7 @@ export function createLSystem() {
   constantsCtr = lSystemParamsFolder.add(lSystemParams, 'constants').name('Constants').disable();
   startCtr = lSystemParamsFolder.add(lSystemParams, 'start').name('Start');
   rulesCtr = lSystemParamsFolder.addFolder( 'Rules' );
-  angleCtr = lSystemParamsFolder.add(lSystemParams, 'angle', 0, 180, 1).name('Angle');
+  anglesCtr = lSystemParamsFolder.addFolder( 'Angles' );
   iterateCtr = lSystemParamsFolder.add(lSystemParams, 'iterate', 1, 8, 1).name('Iterate');
 
   generateLSystemButton = gui.add(fractalGUI, 'generate').name('Generate').hide();
@@ -58,6 +58,18 @@ function changeRules(rules){
   rules.forEach(rule => {
     lSystemParams.rules.push(rule);
     rulesCtr.add(rule, 'rule').name(rule.variable);
+  });
+}
+
+function changeAngles(angles){
+  if(anglesCtr){
+    anglesCtr.controllersRecursive().forEach(angle => {
+      angle.destroy();
+    });
+  }
+  angles.forEach(angle => {
+    lSystemParams.angles.push(angle);
+    anglesCtr.add(angle, 'angle', 0, 180, 1).name(angle.axis);
   });
 }
   
@@ -96,7 +108,7 @@ function loadPreload(preload) {
   startCtr.setValue(preload.start);
 
   changeRules(preload.rules);
+  changeAngles(preload.angles);
 
-  angleCtr.setValue(preload.angle);
   iterateCtr.setValue(preload.iterate);
 }

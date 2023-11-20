@@ -23,7 +23,7 @@ export function createIFS() {
 
   IFSParamsFolder = gui.addFolder('IFS params').hide(); // not pretty
 
-  iterateCtr = IFSParamsFolder.add(IFSParams, 'iterate', 1, 10, 1).name('Iterate');
+  iterateCtr = IFSParamsFolder.add(IFSParams, 'iterate', 1, 9, 1).name('Iterate');
 
   generateIFSButton = gui.add(fractalGUI, 'generate').name('Generate').hide();
 
