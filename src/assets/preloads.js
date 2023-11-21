@@ -27,24 +27,24 @@ export var preloadTree = {
     rules: [
         {
             variable: "F",
-            rule: "F+FF"
+            rule: "F[+F][-F][>F][<F]"
         }
     ],
     angles: [
         {
             axis: "X axis (+, -)",
-            angle: 22.5
+            angle: 25
         },
         {
             axis: "Y axis (&, ^)",
-            angle: 45
+            angle: 25
         },
         {
             axis: "Z axis (<, >)",
-            angle: 67.5
+            angle: 25
         }
     ],
-    iterate: 1,
+    iterate: 3,
 };
 
 export var preloadCurve = {
