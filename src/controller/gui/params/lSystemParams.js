@@ -2,7 +2,9 @@ import { preloadCurve, preloadCustom, preloadTree } from '../../../assets/preloa
 import { gui, fractalGUI } from '../gui.js';
 
 let lSystemParamsFolder;
-let variablesCtr, constantsCtr, startCtr, rulesCtr, anglesCtr, angleCtr, iterateCtr;
+let variablesCtr, constantsCtr, startCtr, rulesCtr, anglesCtr, iterateCtr;
+let geometryParamsCtr, radiusBottomCtr, radiusTopCtr, heightCtr, radialSegmentsCtr;
+let treeCtr, heightModifierCtr, widthModifierCtr, ifLeafCtr, ifModifyCtr, leafLengthCtr;
 let preloadCtr;
 let generateLSystemButton;
 let lSystemPreloads;
@@ -12,7 +14,16 @@ let lSystemParams = {
   start: "",
   rules: [],
   angles: [],
+  radiusTop: 1,
+  radiusBottom: 1,
+  height: 1,
+  radialSegments: 1,
   iterate: 1,
+  ifModify: false,
+  heightModifier: 1,
+  widthModifier: 1,
+  ifLeaf: false,
+  leafLength: 1,
 };
 
 export function destroyLSystem() {
@@ -27,14 +38,28 @@ export function createLSystem() {
 
   lSystemParamsFolder = gui.addFolder('L-System params').hide(); // not pretty
 
-  //TODO REAL TIME VALIDATION FOR VARIABLES AND RULES
+  geometryParamsCtr = lSystemParamsFolder.addFolder( 'Geometry params' ).close();
+  radiusTopCtr = geometryParamsCtr.add(lSystemParams, 'radiusTop', 1, 10, 1).name('Bottom radius');
+  radiusBottomCtr = geometryParamsCtr.add(lSystemParams, 'radiusBottom', 1, 10, 1).name('Top radius');
+  heightCtr = geometryParamsCtr.add(lSystemParams, 'height', 1, 100, 1).name('Height');
+  radialSegmentsCtr = geometryParamsCtr.add(lSystemParams, 'radialSegments', 1, 10, 1).name('Radial segments');
+    
   variablesCtr = lSystemParamsFolder.add(lSystemParams, 'variables').name('Variables');
   constantsCtr = lSystemParamsFolder.add(lSystemParams, 'constants').name('Constants').disable();
   startCtr = lSystemParamsFolder.add(lSystemParams, 'start').name('Start');
+  
   rulesCtr = lSystemParamsFolder.addFolder( 'Rules' );
-  anglesCtr = lSystemParamsFolder.addFolder( 'Angles' );
-  iterateCtr = lSystemParamsFolder.add(lSystemParams, 'iterate', 1, 8, 1).name('Iterate');
+  anglesCtr = lSystemParamsFolder.addFolder( 'Angles' ).close();
 
+  treeCtr = lSystemParamsFolder.addFolder('Tree').close();
+  ifModifyCtr = treeCtr.add(lSystemParams, 'ifModify').name('Modify');
+  heightModifierCtr = treeCtr.add(lSystemParams, 'heightModifier', 0.1, 0.9, 0.05).name('Height modifier');
+  widthModifierCtr = treeCtr.add(lSystemParams, 'widthModifier', 0.1, 0.9, 0.05).name('Width modifier');
+  ifLeafCtr = treeCtr.add(lSystemParams, 'ifLeaf').name('Leaf');
+  leafLengthCtr = treeCtr.add(lSystemParams, 'leafLength', 1, 20, 1).name('Leaf Length');
+
+  iterateCtr = lSystemParamsFolder.add(lSystemParams, 'iterate', 1, 6, 1).name('Iterate');
+  
   generateLSystemButton = gui.add(fractalGUI, 'generate').name('Generate').hide();
 
   preloadCtr.onChange( value => {
@@ -66,7 +91,7 @@ function changeAngles(angles){
   lSystemParams.angles.splice(0, lSystemParams.angles.length);
   angles.forEach(angle => {
     lSystemParams.angles.push(angle);
-    anglesCtr.add(angle, 'angle', 0, 180, 1).name(angle.axis);
+    anglesCtr.add(angle, 'angle', 0, 90, 1).name(angle.axis);
   });
 }
   
@@ -107,5 +132,16 @@ function loadPreload(preload) {
   changeRules(preload.rules);
   changeAngles(preload.angles);
 
+  radiusBottomCtr.setValue(preload.radiusBottom);
+  radiusTopCtr.setValue(preload.radiusTop);
+  heightCtr.setValue(preload.height);
+  radialSegmentsCtr.setValue(preload.radialSegments);
+
   iterateCtr.setValue(preload.iterate);
+
+  ifModifyCtr.setValue(preload.ifModify);
+  heightModifierCtr.setValue(preload.heightModifier);
+  widthModifierCtr.setValue(preload.widthModifier);
+  ifLeafCtr.setValue(preload.ifLeaf);
+  leafLengthCtr.setValue(preload.leafLength);
 }

@@ -25,8 +25,7 @@ function init(){
   renderer.setSize( window.innerWidth, window.innerHeight );
   camera.position.set(0, 100, 100);
 
-  const axesHelper = new THREE.AxesHelper( 1000 );
-  scene.add( axesHelper );
+  addAxesHelper();
   addLights();
   addGUI();
   addControls();
@@ -35,22 +34,25 @@ function init(){
   renderer.render(scene, camera);
 }
 
-let oldLSystem;
-let oldIFS;
+let LSystem;
+let IFS;
 
 export function generateFractal(fractalParams, fractalType) {
-  scene.remove(oldLSystem);
-  scene.remove(oldIFS);
+  scene.remove(LSystem);
+  scene.remove(IFS);
 
   if(fractalType == "L-System") {
-    let newlSystem = renderLSystem(fractalParams);
-    oldLSystem = newlSystem;
-    scene.add(newlSystem);
+    LSystem = renderLSystem(fractalParams);
+    scene.add(LSystem);
   } else if (fractalType == "IFS") {
-    let newIFS = renderIFS(fractalParams);
-    oldIFS = newIFS;
-    scene.add(newIFS);
+    IFS = renderIFS(fractalParams);
+    scene.add(IFS);
   }
+}
+
+function addAxesHelper() {
+  const axesHelper = new THREE.AxesHelper( 1000 );
+  scene.add( axesHelper );
 }
 
 function addLights() {

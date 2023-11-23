@@ -1,90 +1,116 @@
 import * as THREE from 'three';
+import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 export function renderLSystem(lSystemParams) {
-  let branchGeometry = new THREE.CylinderGeometry(1.5, 2, 30, 10);
+  let fractal = iterateLSystem(lSystemParams);
+
+  const ruleIterator = fractal[Symbol.iterator]();
+  let ruleChar = ruleIterator.next();
+  let branches = [];
+  let states = [];
+  let isNewBranch = false;
+
+  let leafGeometries = [];
+  let leafGeometry = new THREE.BoxGeometry(
+    lSystemParams.leafLength, lSystemParams.leafLength, lSystemParams.leafLength);
+  let isNextLeaf = false;
+
+  let branchGeometry = new THREE.CylinderGeometry(
+      lSystemParams.radiusTop, lSystemParams.radiusBottom, 
+      lSystemParams.height, lSystemParams.radialSegments,
+    );
   let branchMaterial = new THREE.MeshLambertMaterial({ color: 0x964B00 });
   let currBranch = new THREE.Mesh(branchGeometry, branchMaterial);
-
-  let firstIteration = new THREE.Group();
-
-  let lSystemIteration = lSystemParams.start.replaceAll(lSystemParams.variables, lSystemParams.rules[0].rule);
-
-  firstIteration.add(currBranch);
-  firstIteration = iterateLSystem(lSystemIteration, lSystemParams, firstIteration, 0.9, 0.9);
-
-  let currIteration = new THREE.Group();
-  currIteration.add(currBranch);
-
-  for(let i = 0; i < lSystemParams.iterate; i++){
-    currIteration = iterateLSystem(lSystemIteration, lSystemParams, currIteration, 0.9, 0.9);
-    // currIteration.remove(currIteration.children[0]);
-  }
-
-  console.log(currIteration);
-  return currIteration;
-}
-
-function iterateLSystem(lSystemIteration, lSystemParams, currIteration, heightModifier, widthModifier) {
-  let nextIteration = new THREE.Group();
-  let states = [];
-  let modifiers = [];
-  let isNewIteration = false;
-  
-  let variablesArray = lSystemParams.variables.split(',').map(variable => variable.trim());
+  // let variablesArray = lSystemParams.variables.split(',').map(variable => variable.trim());
   let constantsArray = lSystemParams.constants.split(',').map(constant => constant.trim());
 
-  let firstIteration = new THREE.Group();
-  firstIteration.add(currIteration);
+  let heightModifier = lSystemParams.heightModifier;
+  let widthModifier = lSystemParams.widthModifier;
+  let modifiers = [];
 
-  const iterator = lSystemIteration[Symbol.iterator]();
-  let char = iterator.next();
-
-  var groupSize = new THREE.Box3().setFromObject(currIteration);
-  const size = new THREE.Vector3();
-  groupSize.getSize(size);
-  
-  var height = size.y;
-
-  console.log(height);
-  while (!char.done) {
-    if (constantsArray.includes(char.value)) {
-      if (isNewIteration) {
-        currIteration.scale.y *= heightModifier;
-        currIteration.scale.x *= - widthModifier;
-        currIteration.scale.z *= - widthModifier;
-        currIteration.translateY(heightModifier * height / 2);
-        isNewIteration = false;
+  while (!ruleChar.done) {
+    if(constantsArray.includes(ruleChar.value)){
+      if (isNewBranch) {
+        let height = currBranch.geometry.parameters.height;
+        if (lSystemParams.ifModify) {
+          currBranch.scale.y = heightModifier;
+          currBranch.scale.x = -widthModifier;
+          currBranch.scale.z = -widthModifier;
+          widthModifier *= 0.9;
+          heightModifier *= 0.9;
+          height *= heightModifier;
+        }
+        currBranch = translateBranch(currBranch, height / 2);
+        isNewBranch = false;
       }
-      if (char.value == '[') {
-        states.push(currIteration.clone());
-        modifiers.push({
-          heightModifier: heightModifier,
-          widthModifier: widthModifier
-        });
-      } else if((char.value == ']') && (states.length > 0)) {
-        currIteration = states[states.length - 1].clone();
-        heightModifier = modifiers[modifiers.length - 1].heightModifier;
-        widthModifier = modifiers[modifiers.length - 1].widthModifier;
-        modifiers.pop();
+      if(ruleChar.value == '[') {
+        states.push(currBranch.clone());
+        if (lSystemParams.ifModify) {
+          modifiers.push({
+            heightModifier: heightModifier,
+            widthModifier: widthModifier
+          });
+        }
+        isNextLeaf = true;
+      } else if((ruleChar.value == ']') && (states.length > 0)) {
+        if((isNextLeaf) && (lSystemParams.ifLeaf)) {
+          isNextLeaf = false;
+          let leafPosition = currBranch.position;
+          let leafCopy = leafGeometry.clone();
+          leafCopy.translate(leafPosition.x, leafPosition.y, leafPosition.z);
+          leafGeometries.push(leafCopy);
+        }
+        currBranch = states[states.length - 1].clone();
+        if (lSystemParams.ifModify) {
+          heightModifier = modifiers[modifiers.length - 1].heightModifier;
+          widthModifier = modifiers[modifiers.length - 1].widthModifier;
+          modifiers.pop();
+        }
         states.pop();
+      } else if(ruleChar.value == 'F') {
+        let height = currBranch.geometry.parameters.height;
+        if (lSystemParams.ifModify) {
+          currBranch.scale.y = heightModifier;
+          currBranch.scale.x = -widthModifier;
+          currBranch.scale.z = -widthModifier;
+          widthModifier *= 0.9;
+          heightModifier *= 0.9;
+          height *= heightModifier;
+        }
+        currBranch = translateBranch(currBranch, height / 2);
+        branches.push(currBranch.clone());
+        isNewBranch = true;
       } else {
-        // try if works with nextIteration
-        currIteration = rotateBranch(char.value, currIteration, lSystemParams);
-      } 
-    } else if(variablesArray.includes(char.value)) {
-      currIteration.scale.y *= heightModifier;
-      currIteration.scale.x *= - widthModifier;
-      currIteration.scale.z *= - widthModifier;
-      widthModifier *= widthModifier;
-      heightModifier *= heightModifier;
-      currIteration.translateY(heightModifier * height / 2);
-      nextIteration.add(currIteration.clone());
-      isNewIteration = true;
+        currBranch = rotateBranch(ruleChar.value, currBranch, lSystemParams);
+      }
     }
-    char = iterator.next();
+    ruleChar = ruleIterator.next();
   }
-  nextIteration.remove(firstIteration.children[0]);
-  return nextIteration;
+  let group = new THREE.Group();
+  branches.forEach(branch => {
+    group.add(branch);
+  });
+
+  if(lSystemParams.ifLeaf) {
+    let leaves = BufferGeometryUtils.mergeGeometries(leafGeometries);
+    let combinedMesh = new THREE.Mesh(
+      leaves,
+      new THREE.MeshNormalMaterial()
+    );
+    group.add(combinedMesh);
+  }
+
+  return group;
+}
+
+function iterateLSystem(lSystemParams) {
+  let fractal = lSystemParams.start;
+  for(let i = 0; i < lSystemParams.iterate; i++){
+    lSystemParams.rules.forEach(rule => {
+      fractal = fractal.replaceAll(rule.variable, rule.rule);
+    })
+  }
+  return fractal;
 }
 
 function rotateBranch(direction, branch, lSystemParams) {
@@ -102,6 +128,14 @@ function rotateBranch(direction, branch, lSystemParams) {
     branch.rotation.z -= Math.PI / 180 * lSystemParams.angles[2].angle;
   } else if(direction == '|') {
     branch.rotation.x -= Math.PI;
+    branch.rotation.y -= Math.PI;
+    branch.rotation.z -= Math.PI;
   }
   return branch;
 }
+
+function translateBranch(branch, length) {
+  branch.translateY(length);
+  return branch;
+}
+
