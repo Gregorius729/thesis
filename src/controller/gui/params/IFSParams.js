@@ -1,5 +1,5 @@
 import { preloadMengerSponge, preloadSierpinskiPyramid } from '../../../assets/preloads.js';
-import { gui, fractalGUI } from '../gui.js';
+import { gui, fractalGUI } from '../../../main.js';
 
 let IFSParamsFolder;
 let iterateCtr;
@@ -18,12 +18,10 @@ export function destroyIFS() {
 }
 
 export function createIFS() {
-  IFSPreloads = {"Menger sponge" : preloadMengerSponge, "Sierpinski Pyramid" : preloadSierpinskiPyramid};
+  IFSPreloads = {"Menger Sponge" : preloadMengerSponge, "Sierpinski Pyramid" : preloadSierpinskiPyramid};
   preloadCtr = gui.add(fractalGUI, 'preload', IFSPreloads).name("Preload");
 
-  IFSParamsFolder = gui.addFolder('IFS params').hide(); // not pretty
-
-  iterateCtr = IFSParamsFolder.add(IFSParams, 'iterate', 1, 9, 1).name('Iterate');
+  IFSParamsFolder = gui.addFolder('Params').hide(); // not pretty
 
   generateIFSButton = gui.add(fractalGUI, 'generate').name('Generate').hide();
 
@@ -33,10 +31,22 @@ export function createIFS() {
 
   return IFSParams;
 }
-  
+ 
+function changeIterateCtr(ifsType) {
+  if (ifsType == "Menger Sponge") {
+  iterateCtr = IFSParamsFolder.add(IFSParams, 'iterate', 1, 4, 1).name('Iterate');
+  } else if (ifsType == "Sierpinski Pyramid") {
+    iterateCtr = IFSParamsFolder.add(IFSParams, 'iterate', 1, 9, 1).name('Iterate');
+  }
+}
+
 function loadPreload(preload) {
   IFSParamsFolder.show();
   generateIFSButton.show();
   IFSParams.type = preload.type;
+  if(iterateCtr) {
+    iterateCtr.destroy();
+  }
+  changeIterateCtr(preload.type);
   iterateCtr.setValue(preload.iterate);
 }

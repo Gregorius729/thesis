@@ -11,21 +11,22 @@ export function renderLSystem(lSystemParams) {
   let isNewBranch = false;
 
   let leafGeometries = [];
-  let leafGeometry = new THREE.BoxGeometry(
-    lSystemParams.leafLength, lSystemParams.leafLength, lSystemParams.leafLength);
+  let leafGeometry = new THREE.SphereGeometry(lSystemParams.leafLength); 
   let isNextLeaf = false;
 
   let branchGeometry = new THREE.CylinderGeometry(
       lSystemParams.radiusTop, lSystemParams.radiusBottom, 
       lSystemParams.height, lSystemParams.radialSegments,
     );
-  let branchMaterial = new THREE.MeshLambertMaterial({ color: 0x964B00 });
+  let branchMaterial = new THREE.MeshLambertMaterial({ color: lSystemParams.branchColor });
   let currBranch = new THREE.Mesh(branchGeometry, branchMaterial);
   // let variablesArray = lSystemParams.variables.split(',').map(variable => variable.trim());
   let constantsArray = lSystemParams.constants.split(',').map(constant => constant.trim());
 
   let heightModifier = lSystemParams.heightModifier;
   let widthModifier = lSystemParams.widthModifier;
+  let constHeightModifier = lSystemParams.heightModifier;
+  let constWidthModifier = lSystemParams.widthModifier;
   let modifiers = [];
 
   while (!ruleChar.done) {
@@ -36,8 +37,8 @@ export function renderLSystem(lSystemParams) {
           currBranch.scale.y = heightModifier;
           currBranch.scale.x = -widthModifier;
           currBranch.scale.z = -widthModifier;
-          widthModifier *= 0.9;
-          heightModifier *= 0.9;
+          widthModifier *= constWidthModifier;
+          heightModifier *= constHeightModifier;
           height *= heightModifier;
         }
         currBranch = translateBranch(currBranch, height / 2);
@@ -73,15 +74,29 @@ export function renderLSystem(lSystemParams) {
           currBranch.scale.y = heightModifier;
           currBranch.scale.x = -widthModifier;
           currBranch.scale.z = -widthModifier;
-          widthModifier *= 0.9;
-          heightModifier *= 0.9;
+          widthModifier *= constWidthModifier;
+          heightModifier *= constHeightModifier;
           height *= heightModifier;
         }
         currBranch = translateBranch(currBranch, height / 2);
         branches.push(currBranch.clone());
         isNewBranch = true;
       } else {
-        currBranch = rotateBranch(ruleChar.value, currBranch, lSystemParams);
+        if(ruleChar.value == 'G') {
+          let height = currBranch.geometry.parameters.height;
+          if (lSystemParams.ifModify) {
+            currBranch.scale.y = heightModifier;
+            currBranch.scale.x = -widthModifier;
+            currBranch.scale.z = -widthModifier;
+            widthModifier *= constWidthModifier;
+            heightModifier *= constHeightModifier;
+            height *= heightModifier;
+          }
+          currBranch = translateBranch(currBranch, height / 2);
+          branches.push(currBranch.clone());
+          isNewBranch = true;
+        } 
+        currBranch = rotateLSystem(ruleChar.value, currBranch, lSystemParams);
       }
     }
     ruleChar = ruleIterator.next();
@@ -95,7 +110,7 @@ export function renderLSystem(lSystemParams) {
     let leaves = BufferGeometryUtils.mergeGeometries(leafGeometries);
     let combinedMesh = new THREE.Mesh(
       leaves,
-      new THREE.MeshNormalMaterial()
+      new THREE.MeshLambertMaterial( { color: lSystemParams.leafColor } )
     );
     group.add(combinedMesh);
   }
@@ -106,30 +121,38 @@ export function renderLSystem(lSystemParams) {
 function iterateLSystem(lSystemParams) {
   let fractal = lSystemParams.start;
   for(let i = 0; i < lSystemParams.iterate; i++){
-    lSystemParams.rules.forEach(rule => {
-      fractal = fractal.replaceAll(rule.variable, rule.rule);
-    })
+    const ruleIterator = fractal[Symbol.iterator]();
+    let ruleChar = ruleIterator.next();
+    let newFractal = '';
+    while (!ruleChar.done) {
+      let currRule = lSystemParams.rules.find(rule => rule.variable === ruleChar.value);
+      if(currRule == undefined) {
+        newFractal += ruleChar.value;
+      } else if(ruleChar.value == currRule.variable){
+        newFractal += currRule.rule;
+      }
+      ruleChar = ruleIterator.next();
+    }
+    fractal = newFractal;
   }
   return fractal;
 }
 
-function rotateBranch(direction, branch, lSystemParams) {
+function rotateLSystem(direction, branch, lSystemParams) {
   if(direction == '+') {
-    branch.rotation.x += Math.PI / 180 * lSystemParams.angles[0].angle;
+    branch.rotation.z += Math.PI / 180 * lSystemParams.angles[0].angle;
   } else if(direction == '-') {
-    branch.rotation.x -= Math.PI / 180 * lSystemParams.angles[0].angle;
-  } else if(direction == '&') {
-    branch.rotation.y += Math.PI / 180 * lSystemParams.angles[1].angle;
+    branch.rotation.z -= Math.PI / 180 * lSystemParams.angles[0].angle;
   } else if(direction == '^') {
-    branch.rotation.y -= Math.PI / 180 * lSystemParams.angles[1].angle;
+    branch.rotation.x += Math.PI / 180 * lSystemParams.angles[1].angle;
+  } else if(direction == '&') {
+    branch.rotation.x -= Math.PI / 180 * lSystemParams.angles[1].angle;
   } else if(direction == '>') {
-    branch.rotation.z += Math.PI / 180 * lSystemParams.angles[2].angle;
+    branch.rotation.y += Math.PI / 180 * lSystemParams.angles[2].angle;
   } else if(direction == '<') {
-    branch.rotation.z -= Math.PI / 180 * lSystemParams.angles[2].angle;
+    branch.rotation.y -= Math.PI / 180 * lSystemParams.angles[2].angle;
   } else if(direction == '|') {
-    branch.rotation.x -= Math.PI;
     branch.rotation.y -= Math.PI;
-    branch.rotation.z -= Math.PI;
   }
   return branch;
 }

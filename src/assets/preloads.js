@@ -5,16 +5,16 @@ export var preloadCustom = {
     rules: [],
     angles: [
         {
-            axis: "X axis (+, -)",
-            angle: 0
+            axis: "X axis (^, &)",
+            angle: 25
         },
         {
-            axis: "Y axis (&, ^)",
-            angle: 0
+            axis: "Y axis (<, >)",
+            angle: 25
         },
         {
-            axis: "Z axis (<, >)",
-            angle: 0
+            axis: "Z axis (+, -)",
+            angle: 25
         }
     ],
     radiusTop: 1.5,
@@ -27,6 +27,8 @@ export var preloadCustom = {
     widthModifier: 0.9,
     ifLeaf: false,
     leafLength: 10,
+    leafColor: '#207336',
+    branchColor: '#964B00',
 };
 
 export var preloadTree = {
@@ -36,20 +38,20 @@ export var preloadTree = {
     rules: [
         {
             variable: "F",
-            rule: "F[+F][-F][>F][<F]"
+            rule: "F[+F][-F][^F][&F]"
         }
     ],
     angles: [
         {
-            axis: "X axis (+, -)",
+            axis: "X axis (^, &)",
             angle: 25
         },
         {
-            axis: "Y axis (&, ^)",
+            axis: "Y axis (<, >)",
             angle: 25
         },
         {
-            axis: "Z axis (<, >)",
+            axis: "Z axis (+, -)",
             angle: 25
         }
     ],
@@ -63,42 +65,44 @@ export var preloadTree = {
     widthModifier: 0.9,
     ifLeaf: true,
     leafLength: 10,
+    leafColor: '#207336',
+    branchColor: '#964B00',
 };
 
 export var preloadCurve = {
-    variables: "A, B, C, D",
+    variables: "F, G",
     constants: "F, +, -, &, ^, <, >, |, [, ]",
-    start: "A",
+    start: "F-G-G",
     rules: [
         {
-            variable: "A",
-            rule: "B-F+CFC+F-D&F∧D-F+&&CFC+F+B>>"
+            variable: "G",
+            rule: "F-G+F+G-F"
         },
         {
-            variable: "B",
-            rule: "A&F∧CFB∧F∧D∧∧-F-D∧|F∧B|FC∧F∧A>>"
+            variable: "G",
+            rule: "GG"
         },
         {
             variable: "C",
-            rule: "|D∧|F∧B-F+C∧F∧A&&FA&F∧C+F+B∧F∧D>>"
+            rule: "|D^|F^B-F+C^F^A&&FA&F^C+F+B^F^D>>"
         },
         {
             variable: "D",
-            rule: "|CFB-F+B|FA&F∧A&&FB-F+B|FC>>"
+            rule: "|CFB-F+B|FA&F^A&&FB-F+B|FC>>"
         },
     ],
     angles: [
         {
-            axis: "X axis (+, -)",
-            angle: 90
+            axis: "X axis (^, &)",
+            angle: 120
         },
         {
-            axis: "Y axis (&, ^)",
-            angle: 90
+            axis: "Y axis (<, >)",
+            angle: 120
         },
         {
-            axis: "Z axis (<, >)",
-            angle: 90
+            axis: "Z axis (+, -)",
+            angle: 120
         }
     ],
     radiusTop: 2,
@@ -111,6 +115,8 @@ export var preloadCurve = {
     widthModifier: 0.9,
     ifLeaf: false,
     leafLength: 10,
+    leafColor: '#207336',
+    branchColor: '#964B00',
 };
 
 export var preloadMengerSponge = {
@@ -120,5 +126,5 @@ export var preloadMengerSponge = {
 
 export var preloadSierpinskiPyramid = {
     type: "Sierpinski Pyramid",
-    iterate: 1,
+    iterate: 2,
 }

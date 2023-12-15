@@ -1,41 +1,29 @@
-import { GUI } from 'lil-gui';
-import { generateFractal } from '../../main.js';
 import { createLSystem, destroyLSystem } from './params/lSystemParams.js';
 import { createIFS, destroyIFS } from './params/IFSParams.js';
+import { gui, fractalGUI } from '../../main.js';
 
 let fractalTypesDropdown;
-let fractalTypes = ["L-System", "IFS", "Limitation set"];
-let currFractalType, currPreloadType;
+let fractalTypes = ["L-System", "Other"];
+export let currFractalType;
 
-export let fractalGUI = {
-  fractalTypes: "Select one",
-  preload: "Select one",
-  generate: function() { generateFractal(GUIParams, currFractalType) }
-};
-
-let GUIParams = {};
-
-export const gui = new GUI();
+export let GUIParams = {};
 
 export function addGUI() {
   currFractalType = fractalGUI.fractalTypes;
+  
   fractalTypesDropdown = gui.add(fractalGUI, 'fractalTypes', fractalTypes).name("Fractal Type");
 
   fractalTypesDropdown.onChange( value => {
-    currPreloadType = fractalGUI.preload;
     fractalGUI.preload = "Select one";
     GUIParams = {};
     if(currFractalType == "L-System"){
       destroyLSystem();
-    } else if (currFractalType == "IFS") {
+    } else if (currFractalType == "Other") {
       destroyIFS();
     }
-    // else if (currFractalType == fractalTypes[2]) {
-    //   limSet.destroy();
-    // }
     if(value == "L-System") {
       GUIParams = createLSystem();
-    } else if(value == "IFS") {
+    } else if(value == "Other") {
       GUIParams = createIFS();
     }
     currFractalType = value;
