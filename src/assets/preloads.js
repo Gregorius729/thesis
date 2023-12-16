@@ -70,39 +70,31 @@ export var preloadTree = {
 };
 
 export var preloadCurve = {
-    variables: "F, G",
-    constants: "F, +, -, &, ^, <, >, |, [, ]",
-    start: "F-G-G",
+    variables: "F, X",
+    constants: "F, X, +, -, &, ^, <, >, |, [, ]",
+    start: "X",
     rules: [
         {
-            variable: "G",
-            rule: "F-G+F+G-F"
+            variable: "X",
+            rule: "F+[[X]-X]-F[-FX]+X"
         },
         {
-            variable: "G",
-            rule: "GG"
-        },
-        {
-            variable: "C",
-            rule: "|D^|F^B-F+C^F^A&&FA&F^C+F+B^F^D>>"
-        },
-        {
-            variable: "D",
-            rule: "|CFB-F+B|FA&F^A&&FB-F+B|FC>>"
+            variable: "F",
+            rule: "FF"
         },
     ],
     angles: [
         {
             axis: "X axis (^, &)",
-            angle: 120
+            angle: 25
         },
         {
             axis: "Y axis (<, >)",
-            angle: 120
+            angle: 25
         },
         {
             axis: "Z axis (+, -)",
-            angle: 120
+            angle: 25
         }
     ],
     radiusTop: 2,

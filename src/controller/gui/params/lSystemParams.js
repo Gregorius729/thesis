@@ -47,21 +47,21 @@ export function createLSystem() {
   radialSegmentsCtr = geometryParamsCtr.add(lSystemParams, 'radialSegments', 2, 10, 1).name('Radial segments');
     
   variablesCtr = lSystemParamsFolder.add(lSystemParams, 'variables').name('Variables');
-  constantsCtr = lSystemParamsFolder.add(lSystemParams, 'constants').name('Constants').disable();
+  constantsCtr = lSystemParamsFolder.add(lSystemParams, 'constants').name('Constants');
   startCtr = lSystemParamsFolder.add(lSystemParams, 'start').name('Start');
   
   rulesCtr = lSystemParamsFolder.addFolder( 'Rules' );
   anglesCtr = lSystemParamsFolder.addFolder( 'Angles' ).close();
   
-  branchColorCtr = lSystemParamsFolder.addColor(lSystemParams, 'branchColor').name('Color');
+  branchColorCtr = lSystemParamsFolder.addColor(lSystemParams, 'branchColor').name('Branch color');
   
   treeCtr = lSystemParamsFolder.addFolder('Tree').close();
   ifModifyCtr = treeCtr.add(lSystemParams, 'ifModify').name('Modify');
   heightModifierCtr = treeCtr.add(lSystemParams, 'heightModifier', 0.75, 0.99, 0.01).name('Height modifier');
   widthModifierCtr = treeCtr.add(lSystemParams, 'widthModifier', 0.75, 0.99, 0.01).name('Width modifier');
   ifLeafCtr = treeCtr.add(lSystemParams, 'ifLeaf').name('Leaf');
-  leafLengthCtr = treeCtr.add(lSystemParams, 'leafLength', 1, 20, 1).name('Leaf Length');
-  leafColorCtr = treeCtr.addColor(lSystemParams, 'leafColor').name('Leaf Color');
+  leafLengthCtr = treeCtr.add(lSystemParams, 'leafLength', 1, 20, 1).name('Leaf length');
+  leafColorCtr = treeCtr.addColor(lSystemParams, 'leafColor').name('Leaf color');
 
   iterateCtr = lSystemParamsFolder.add(lSystemParams, 'iterate', 1, 6, 1).name('Iterate');
   

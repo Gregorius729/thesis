@@ -12,7 +12,7 @@ let scene, camera, renderer;
 let ambientLight, directionalLight;
 let stats;
 let controls;
-let controlsCtr, resetCameraButton, axesHelperCheckbox, statsCheckbox;
+let controlsCtr, resetCameraButton, axesHelperCheckbox, statsCheckbox, backgroundCtr;
 let animateCheckbox, animateSpeedCtr;
 const axesHelper = new THREE.AxesHelper( 1000 );
 stats = new Stats();
@@ -26,6 +26,7 @@ export let fractalGUI = {
   preload: "Select one",
   animate: false,
   animateSpeed: 0.02,
+  background: "#ffffff",
   generate: function() { generateFractal(GUIParams, currFractalType) }
 };
 
@@ -34,8 +35,7 @@ gui.title('Fractal Generator');
 
 function init(){
   scene = new THREE.Scene();
-
-  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 5000 );
 
   renderer = new THREE.WebGLRenderer({
     canvas: document.querySelector(`#bg`),
@@ -43,6 +43,7 @@ function init(){
   
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
+  renderer.setClearColor(fractalGUI.background);
   camera.position.set(100, 100, 100);
 
   controlsCtr = gui.addFolder('Controls').close();
@@ -54,6 +55,9 @@ function init(){
   });
   animateCheckbox = controlsCtr.add(fractalGUI, 'animate').name('Animate');
   animateSpeedCtr = controlsCtr.add(fractalGUI, 'animateSpeed', 0.005, 0.1, 0.005).name('Animate speed');
+  backgroundCtr = controlsCtr.addColor(fractalGUI, 'background').name('Background color').onChange( value => {
+    renderer.setClearColor(value);
+  });
   resetCameraButton = controlsCtr.add(fractalGUI, 'resetCamera').name('Reset camera');
   
   addLights();

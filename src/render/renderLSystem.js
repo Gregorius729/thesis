@@ -3,7 +3,6 @@ import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUti
 
 export function renderLSystem(lSystemParams) {
   let fractal = iterateLSystem(lSystemParams);
-
   const ruleIterator = fractal[Symbol.iterator]();
   let ruleChar = ruleIterator.next();
   let branches = [];
@@ -68,7 +67,14 @@ export function renderLSystem(lSystemParams) {
           modifiers.pop();
         }
         states.pop();
-      } else if(ruleChar.value == 'F') {
+      } else if(
+          (ruleChar.value == '+') || (ruleChar.value == '-') || 
+          (ruleChar.value == '^') || (ruleChar.value == '&') || 
+          (ruleChar.value == '>') || (ruleChar.value == '<') || 
+          (ruleChar.value == '|')
+        ) {
+        currBranch = rotateLSystem(ruleChar.value, currBranch, lSystemParams);
+      } else {
         let height = currBranch.geometry.parameters.height;
         if (lSystemParams.ifModify) {
           currBranch.scale.y = heightModifier;
@@ -81,22 +87,6 @@ export function renderLSystem(lSystemParams) {
         currBranch = translateBranch(currBranch, height / 2);
         branches.push(currBranch.clone());
         isNewBranch = true;
-      } else {
-        if(ruleChar.value == 'G') {
-          let height = currBranch.geometry.parameters.height;
-          if (lSystemParams.ifModify) {
-            currBranch.scale.y = heightModifier;
-            currBranch.scale.x = -widthModifier;
-            currBranch.scale.z = -widthModifier;
-            widthModifier *= constWidthModifier;
-            heightModifier *= constHeightModifier;
-            height *= heightModifier;
-          }
-          currBranch = translateBranch(currBranch, height / 2);
-          branches.push(currBranch.clone());
-          isNewBranch = true;
-        } 
-        currBranch = rotateLSystem(ruleChar.value, currBranch, lSystemParams);
       }
     }
     ruleChar = ruleIterator.next();
@@ -152,7 +142,7 @@ function rotateLSystem(direction, branch, lSystemParams) {
   } else if(direction == '<') {
     branch.rotation.y -= Math.PI / 180 * lSystemParams.angles[2].angle;
   } else if(direction == '|') {
-    branch.rotation.y -= Math.PI;
+    branch.rotation.z -= Math.PI;
   }
   return branch;
 }
